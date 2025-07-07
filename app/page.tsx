@@ -5,6 +5,9 @@ import Link from "next/link";
 import React, { useState, useEffect, useRef } from 'react';
 import Wave from 'react-wavify';
 import useSound from 'use-sound';
+import { useSoundContext } from './ui/sound-context'; // Import sound context
+import { MuteButton } from './ui/mute-button';
+
 
 // A simple SVG X icon for the close button
 const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -27,6 +30,8 @@ const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 export default function Home() {
+  const { isMuted } = useSoundContext()
+
   // State for Profile Modal
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isProfileAnimatingOut, setIsProfileAnimatingOut] = useState(false);
@@ -40,6 +45,15 @@ export default function Home() {
   const [isContactAnimatingOut, setIsContactAnimatingOut] = useState(false);
 
   const modalRef = useRef(null);
+
+  const [playAmbient, { stop: stopAmbient }] = useSound(
+    '/sound/waves.mp3', // Make sure you have this file in public/sound/
+    {
+      volume: isMuted ? 0 : 0.50, // Lower volume for ambient sound
+      loop: true,
+      interrupt: true,
+    }
+  );
 
   // Functions for Profile Modal
   const openProfileModal = () => {
@@ -134,9 +148,23 @@ export default function Home() {
     }
   }, [isContactAnimatingOut]);
 
+  useEffect(() => {
+    // Play ambient sound on component mount
+    playAmbient();
+
+    // Stop ambient sound on component unmount
+    return () => {
+      stopAmbient();
+    };
+  }, [playAmbient, stopAmbient]);
+
 
   return (
     <div className="flex flex-col min-h-screen bg-linear-to-b from-blue-600 to-blue-100 font-sans">
+      
+      <header className="p-4 flex justify-end items-center space-x-4">
+        <MuteButton />
+      </header>
       <main className="flex-grow flex flex-col items-center justify-center p-6 md:p-12">
         <div className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
