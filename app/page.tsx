@@ -209,7 +209,7 @@ export default function Home() {
           }}
         />
       </div>
-        <RopeModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} title="Profile" >
+        <RopeModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} title="Profile" > 
           <div className="grid grid-cols-3 gap-4 p-6">
                <div className="col-span-1 flex items-center justify-center">
                  <Image

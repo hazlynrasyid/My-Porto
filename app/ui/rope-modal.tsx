@@ -1,5 +1,7 @@
 // /components/DraggableModal.tsx
 import React, { useState, useEffect, useRef, FC } from 'react';
+// CORRECTED: Import from 'framer-motion' instead of 'motion/react'
+import { motion, AnimatePresence } from "motion/react";
 
 // Define the props for the DraggableModal component
 interface DraggableModalProps {
@@ -18,70 +20,101 @@ const DraggableModal: FC<DraggableModalProps> = ({ isOpen, onClose, children, ti
   // Set the initial position of the modal when it opens
   useEffect(() => {
     if (isOpen) {
-      // Center the modal horizontally and place it one-third down the screen
-      const modalWidth = modalRef.current?.offsetWidth || 500; // Use a default width if ref is not ready
+      // Center the modal horizontally and place it a bit down from the top
+      const modalWidth = modalRef.current?.offsetWidth || 500;
       const initialX = window.innerWidth / 2 - modalWidth / 2;
-      const initialY = window.innerHeight / 3;
+      const initialY = window.innerHeight / 5; // Adjusted for a better initial position
       setModalPosition({ x: initialX, y: initialY });
     }
   }, [isOpen]);
 
   // Handle the start of a drag operation
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    // We only want to drag when the left mouse button is clicked
+    if (e.button !== 0) return;
     setIsDragging(true);
     // Calculate the offset between the mouse cursor and the modal's top-left corner
     setDragOffset({
       x: e.clientX - modalPosition.x,
       y: e.clientY - modalPosition.y,
     });
+    // Prevent text selection while dragging
+    e.preventDefault();
   };
 
-  // Handle the mouse movement during a drag operation
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  // UPDATED: These handlers are now attached to the window for more robust dragging
+  const handleMouseMove = (e: MouseEvent) => {
     if (!isDragging) return;
-    // Update the modal's position based on the new mouse coordinates and the initial offset
     setModalPosition({
       x: e.clientX - dragOffset.x,
       y: e.clientY - dragOffset.y,
     });
   };
 
-  // Handle the end of a drag operation
   const handleMouseUp = () => {
     setIsDragging(false);
   };
 
-  if (!isOpen) {
-    return null;
-  }
+  // ADDED: Effect to add/remove global event listeners for dragging
+  // This makes dragging work even if the cursor leaves the browser window
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    } else {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    }
 
+    // Cleanup function to remove listeners when the component unmounts
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragOffset]); // Rerun when dragging starts/stops
+
+  // KEY CHANGE: The conditional rendering is now INSIDE AnimatePresence
   return (
-    // A full-screen container to capture mouse events for dragging
-    <div 
-      className=" inset-0 z-50 fade-scale-in"
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp} // End dragging if the mouse leaves the window
-    >
-      <div 
-        ref={modalRef}
-        className="bg-white rounded-lg shadow-2xl w-11/12 max-w-lg flex flex-col absolute"
-        style={{ top: modalPosition.y, left: modalPosition.x }}
-      >
-        {/* Modal Header */}
-        <div 
-          className="p-4 border-b flex justify-between items-center cursor-grab active:cursor-grabbing"
-          onMouseDown={handleMouseDown} // Initiate dragging from the header
-        >
-          <h2 className="text-xl font-semibold text-gray-800 select-none">{title}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-800 text-2xl cursor-pointer">&times;</button>
-        </div>
-        {/* Modal Body */}
-        <div className="p-6">
-          {children}
-        </div>
-      </div>
-    </div>
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop with a fade animation */}
+          <motion.div
+            className="fixed inset-0 z-40"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.5 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={onClose} 
+          />
+
+          {/* Draggable Modal Window */}
+          <motion.div
+            ref={modalRef}
+            className="fixed bg-white rounded-lg shadow-2xl w-11/12 max-w-lg flex flex-col z-50"
+            style={{ top: modalPosition.y, left: modalPosition.x }}
+            // Animation properties for open/close
+            initial={{ scale: 0, }}
+            animate={{ scale: 1,  }}
+            exit={{ scale: 0,}}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            {/* Modal Header */}
+            <div
+              className="p-4 border-b flex justify-between items-center cursor-grab active:cursor-grabbing"
+              onMouseDown={handleMouseDown} // Initiate dragging from the header
+            >
+              <h2 className="text-xl font-semibold text-gray-800 select-none">{title}</h2>
+              <button onClick={onClose} className="text-gray-500 hover:text-gray-800 text-2xl cursor-pointer">&times;</button>
+            </div>
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto" style={{ maxHeight: '70vh' }}>
+              {children}
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 };
 
