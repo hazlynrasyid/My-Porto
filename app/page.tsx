@@ -28,7 +28,7 @@ export default function Home() {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isContactAnimatingOut, setIsContactAnimatingOut] = useState(false);
 
-  const modalRef = useRef(null);
+
 
   const [playAmbient, { stop: stopAmbient }] = useSound(
     '/sound/waves.mp3', // Make sure you have this file in public/sound/
