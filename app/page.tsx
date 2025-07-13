@@ -11,23 +11,6 @@ import RopeModal from './ui/rope-modal';
 
 
 // A simple SVG X icon for the close button
-const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg>
-);
 
 
 export default function Home() {
@@ -62,9 +45,6 @@ export default function Home() {
     setIsProfileModalOpen(true);
   };
 
-  const closeProfileModal = () => {
-    setIsProfileAnimatingOut(true);
-  };
 
   // Functions for Analytic Modal
   const openAnalyticModal = () => {
@@ -72,9 +52,7 @@ export default function Home() {
     setIsAnalyticModalOpen(true);
   };
 
-  const closeAnalyticModal = () => {
-    setIsAnalyticAnimatingOut(true);
-  };
+
 
   // Functions for Contact Modal
   const openContactModal = () => {
@@ -82,17 +60,10 @@ export default function Home() {
     setIsContactModalOpen(true);
   };
 
-  const closeContactModal = () => {
-    setIsContactAnimatingOut(true);
-  };
 
   const [playClick] = useSound(
         '/sound/buble-pop.mp3',
         { volume: 0.50 } // You can customize options
-    );
-    const [playClick_2] = useSound(
-        '/sound/bubble-pop-2.mp3',
-        { volume: 0.25 } // You can customize options
     );
 
     // --- CREATE HANDLERS ---
@@ -107,18 +78,6 @@ export default function Home() {
     const handleContactClick = () => {
         playClick(); // It's that simple!
         openContactModal();
-    };
-    const handleProfilecloseClick = () => {
-        playClick_2(); // It's that simple!
-        closeProfileModal();
-    };
-    const handleAnalyticcloseClick = () => {
-        playClick_2(); // It's that simple!
-        closeAnalyticModal();
-    };
-    const handleContactcloseClick = () => {
-        playClick_2(); // It's that simple!
-        closeContactModal();
     };
 
 
