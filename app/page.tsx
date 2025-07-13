@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect} from 'react';
 import Wave from 'react-wavify';
 import useSound from 'use-sound';
 import { useSoundContext } from './ui/sound-context'; // Import sound context
